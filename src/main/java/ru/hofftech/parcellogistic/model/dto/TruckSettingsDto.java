@@ -1,4 +1,4 @@
-package ru.hofftech.model.dto;
+package ru.hofftech.parcellogistic.model.dto;
 
 public class TruckSettingsDto {
 

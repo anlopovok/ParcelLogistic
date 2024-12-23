@@ -1,12 +1,12 @@
-package ru.hofftech.model;
+package ru.hofftech.parcellogistic.model;
 
 public class TruckPlacement {
 
-    private char[][] placement;
+    private final char[][] placement;
 
-    private int width;
+    private final int width;
 
-    private int height;
+    private final int height;
 
     public TruckPlacement(int width, int height) {
         this.width = width;
@@ -31,8 +31,8 @@ public class TruckPlacement {
         return fillledWidth;
     }
 
-    public char getCharAtPosition(int i, int j) {
-        return placement[i][j];
+    public char getCharAtPosition(int line, int column) {
+        return placement[line][column];
     }
 
     public void setCharAtPosition(int line, int column, char value) {
@@ -63,9 +63,9 @@ public class TruckPlacement {
                     );
                 }
             }
-            stringBuilder.append('\n');
+            stringBuilder.append(String.format("%n"));
         }
-        stringBuilder.append('\n');
+        stringBuilder.append(String.format("%n"));
 
         return stringBuilder.toString();
     }

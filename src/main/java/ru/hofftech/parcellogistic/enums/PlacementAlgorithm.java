@@ -1,4 +1,4 @@
-package ru.hofftech.enums;
+package ru.hofftech.parcellogistic.enums;
 
 public enum PlacementAlgorithm {
     SIMPLE,

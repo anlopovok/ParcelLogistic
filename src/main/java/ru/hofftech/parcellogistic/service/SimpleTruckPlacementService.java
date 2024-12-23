@@ -1,15 +1,21 @@
-package ru.hofftech.service;
+package ru.hofftech.parcellogistic.service;
 
-import ru.hofftech.manager.TruckPlacementManager;
-import ru.hofftech.model.Parcel;
-import ru.hofftech.model.PlaceResult;
-import ru.hofftech.model.TruckPlacement;
-import ru.hofftech.model.dto.TruckSettingsDto;
+import ru.hofftech.parcellogistic.manager.TruckPlacementManager;
+import ru.hofftech.parcellogistic.model.Parcel;
+import ru.hofftech.parcellogistic.model.PlaceResult;
+import ru.hofftech.parcellogistic.model.TruckPlacement;
+import ru.hofftech.parcellogistic.model.dto.TruckSettingsDto;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SimpleTruckPlacementService implements TruckPlacementService {
+
+    private final TruckPlacementManager truckPlacementManager;
+
+    public SimpleTruckPlacementService(TruckPlacementManager truckPlacementManager) {
+        this.truckPlacementManager = truckPlacementManager;
+    }
 
     public PlaceResult placeParcelsToTrucks(List<Parcel> parcels, TruckSettingsDto truckSettingsDto) {
         List<TruckPlacement> truckPlacements = new ArrayList<>();
@@ -20,7 +26,7 @@ public class SimpleTruckPlacementService implements TruckPlacementService {
                     truckSettingsDto.getHeight()
             );
 
-            (new TruckPlacementManager(parcel, truckPlacement)).place();
+            truckPlacementManager.place(parcel, truckPlacement);
             truckPlacements.add(truckPlacement);
         }
 

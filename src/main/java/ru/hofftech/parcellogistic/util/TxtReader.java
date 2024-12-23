@@ -1,15 +1,17 @@
-package ru.hofftech.util;
+package ru.hofftech.parcellogistic.util;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j
 public class TxtReader {
 
+    @SneakyThrows
     public List<String> readAllLines(String filePath) {
         try {
             return Files.readAllLines(
@@ -17,7 +19,7 @@ public class TxtReader {
             );
         } catch (Exception e) {
             log.error("File {} not found", filePath);
-            return Collections.emptyList();
+            throw new IOException("Invalid file path");
         }
     }
 }

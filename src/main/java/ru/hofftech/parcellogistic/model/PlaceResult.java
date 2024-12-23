@@ -1,9 +1,9 @@
-package ru.hofftech.model;
+package ru.hofftech.parcellogistic.model;
 
 import java.util.List;
 
 public class PlaceResult {
-    private List<TruckPlacement> truckPlacements;
+    private final List<TruckPlacement> truckPlacements;
 
     public PlaceResult(List<TruckPlacement> truckPlacements) {
         this.truckPlacements = truckPlacements;

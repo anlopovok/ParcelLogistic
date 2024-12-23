@@ -1,7 +1,8 @@
-package ru.hofftech.util;
+package ru.hofftech.parcellogistic.util;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import ru.hofftech.model.Parcel;
+import ru.hofftech.parcellogistic.model.Parcel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ public class TxtParser implements FileParser {
         this.txtReader = txtReader;
     }
 
+    @SneakyThrows
     public List<Parcel> parseParcelsFromFile(String filePath) {
         List<Parcel> parcels = new ArrayList<>();
 
