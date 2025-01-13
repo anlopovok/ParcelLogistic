@@ -2,26 +2,27 @@ package ru.hofftech.parcellogistic.manager;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.hofftech.parcellogistic.model.Parcel;
-import ru.hofftech.parcellogistic.model.TruckPlacement;
+import ru.hofftech.parcellogistic.model.Truck;
 
 @Slf4j
 public class TruckPlacementManager {
 
-    public void place(Parcel parcel, TruckPlacement truckPlacement) {
-        for (int line = truckPlacement.getHeight() - 1; line >= 0; line--) {
-            for (int column = truckPlacement.getFilledWidth(line); column < truckPlacement.getWidth(); column++) {
-                if (canPlaceByStartPosition(parcel, truckPlacement, line, column)) {
-                    placeByStartPosition(parcel, truckPlacement, line, column);
+    public void place(Parcel parcel, Truck truck) {
+        for (int line = truck.getHeight() - 1; line >= 0; line--) {
+            for (int column = truck.getFilledWidth(line); column < truck.getWidth(); column++) {
+                if (canPlaceByStartPosition(parcel, truck, line, column)) {
+                    placeByStartPosition(parcel, truck, line, column);
+                    truck.add(parcel);
                     return;
                 }
             }
         }
     }
 
-    public boolean canPlace(Parcel parcel, TruckPlacement truckPlacement) {
-        for (int line = truckPlacement.getHeight() - 1; line >= 0; line--) {
-            for (int column = truckPlacement.getFilledWidth(line); column < truckPlacement.getWidth(); column++) {
-                if (canPlaceByStartPosition(parcel, truckPlacement, line, column)) {
+    public boolean canPlace(Parcel parcel, Truck truck) {
+        for (int line = truck.getHeight() - 1; line >= 0; line--) {
+            for (int column = truck.getFilledWidth(line); column < truck.getWidth(); column++) {
+                if (canPlaceByStartPosition(parcel, truck, line, column)) {
                     return true;
                 }
             }
@@ -32,23 +33,23 @@ public class TruckPlacementManager {
 
     private boolean canPlaceByStartPosition(
             Parcel parcel,
-            TruckPlacement truckPlacement,
+            Truck truck,
             int truckLine,
             int truckColumn
     ) {
-        return isFitsInTruckFromStartPosition(parcel, truckPlacement, truckLine, truckColumn)
-                && isValidFoundationFromStartPosition(parcel, truckPlacement, truckLine, truckColumn);
+        return isFitsInTruckFromStartPosition(parcel, truck, truckLine, truckColumn)
+                && isValidFoundationFromStartPosition(parcel, truck, truckLine, truckColumn);
     }
 
     private void placeByStartPosition(
             Parcel parcel,
-            TruckPlacement truckPlacement,
+            Truck truck,
             int truckLine,
             int truckColumn
     ) {
         for (int parcelLine = 0; parcelLine < parcel.getHeight(); parcelLine++) {
             for (int parcelColumn = 0; parcelColumn < parcel.getWidthAtLine(parcelLine); parcelColumn++) {
-                truckPlacement.setCharAtPosition(
+                truck.setCharAtPosition(
                         truckLine + parcelLine,
                         truckColumn + parcelColumn,
                         parcel.getCharAtPosition(parcelLine, parcelColumn)
@@ -59,11 +60,11 @@ public class TruckPlacementManager {
 
     private boolean isFitsInTruckFromStartPosition(
             Parcel parcel,
-            TruckPlacement truckPlacement,
+            Truck truck,
             int truckLine,
             int truckColumn
     ) {
-        if (parcel.getWidth() > truckPlacement.getWidth() - truckColumn) {
+        if (parcel.getWidth() > truck.getWidth() - truckColumn) {
             return false;
         }
 
@@ -71,8 +72,8 @@ public class TruckPlacementManager {
             for (int parcelColumn = 0; parcelColumn < parcel.getWidthAtLine(parcelLine); parcelColumn++) {
                 int nextLine = truckLine + parcelLine;
                 int nextColumn = truckColumn + parcelColumn;
-                if (truckPlacement.isOutOfBounds(nextLine, nextColumn)
-                        || truckPlacement.isFilledAtPosition(nextLine, nextColumn)
+                if (truck.isOutOfBounds(nextLine, nextColumn)
+                        || truck.isFilledAtPosition(nextLine, nextColumn)
                 ) {
                     return false;
                 }
@@ -84,7 +85,7 @@ public class TruckPlacementManager {
 
     private boolean isValidFoundationFromStartPosition(
             Parcel parcel,
-            TruckPlacement truckPlacement,
+            Truck truck,
             int truckLine,
             int truckColumn
     ) {
@@ -94,12 +95,12 @@ public class TruckPlacementManager {
                 int lineAfterParcel = truckLine + parcelLine + 1;
                 int columnAfterParcel = truckColumn + parcelColumn;
                 if (
-                    truckPlacement.isHeightLessThan(lineAfterParcel)
+                    truck.isHeightLessThan(lineAfterParcel)
                     || (
-                        !truckPlacement.isOutOfBounds(lineAfterParcel, columnAfterParcel)
-                        && truckPlacement.isFilledAtPosition(lineAfterParcel, columnAfterParcel)
+                        !truck.isOutOfBounds(lineAfterParcel, columnAfterParcel)
+                        && truck.isFilledAtPosition(lineAfterParcel, columnAfterParcel)
                     )
-                    || truckLine + parcel.getHeight() == truckPlacement.getHeight()
+                    || truckLine + parcel.getHeight() == truck.getHeight()
                 ) {
                     foundationWidth++;
                 }
