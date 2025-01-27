@@ -1,40 +1,45 @@
 package ru.hofftech.parcellogistic.controller;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.hofftech.parcellogistic.enums.CommandType;
-import ru.hofftech.parcellogistic.service.command.CommandServiceFactory;
+import ru.hofftech.parcellogistic.model.OutputResult;
+import ru.hofftech.parcellogistic.service.ProcessCommandService;
 
-import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Controller class responsible for handling console input commands and processing them
+ * using the appropriate command strategy.
+ */
 @Slf4j
+@AllArgsConstructor
 public final class ConsoleController {
 
     private final Scanner scanner;
 
-    private final CommandServiceFactory commandServiceFactory;
+    private final ProcessCommandService processCommandService;
 
-    public ConsoleController(Scanner scanner, CommandServiceFactory commandServiceFactory) {
-        this.scanner = scanner;
-        this.commandServiceFactory = commandServiceFactory;
-    }
-
+    /**
+     * Listens for user input commands and processes them accordingly.
+     *
+     * The method continuously reads commands from the console, parses them,
+     * determines the appropriate command strategy, and executes the command.
+     * In case of an error, it logs the exception message.
+     */
     public void listen() {
-        log.info("Start listening...");
+        log.info("Start listening console commands...");
 
-        List<String> commandVariants = CommandType.getLabels();
-        String startMessage = String.format("Enter command [%s]:", String.join("/", commandVariants));
-
-        log.info(startMessage);
+        log.info("Enter command:");
         while (scanner.hasNextLine()) {
             try {
                 String command = scanner.nextLine();
-                CommandType commandType = CommandType.getByUserCommand(command);
-                commandServiceFactory.getProcessCommandService(scanner, commandType).processCommand();
+                OutputResult outputResult = processCommandService.processCommand(command);
+
+                log.info(outputResult.getMessage());
             } catch (Exception e) {
                 log.error("Error: {}", e.getMessage());
             }
-            log.info(startMessage);
+            log.info("Enter command:");
         }
     }
 }

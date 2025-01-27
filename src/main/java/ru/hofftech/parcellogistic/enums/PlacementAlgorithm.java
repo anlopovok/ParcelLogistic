@@ -1,18 +1,24 @@
 package ru.hofftech.parcellogistic.enums;
 
-import java.util.Arrays;
-import java.util.List;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@Getter
+@RequiredArgsConstructor
 public enum PlacementAlgorithm{
-    SIMPLE,
-    OPTIMAL,
-    EQUABLE,
-    TIGHT;
+    SIMPLE("Одна машина - Одна посылка"),
+    OPTIMAL("Оптимальный"),
+    EQUABLE("Равномерный"),
+    TIGHT("Плотный");
 
-    public static List<String> getLabels() {
-        return Arrays.stream(PlacementAlgorithm.values())
-                .map(PlacementAlgorithm::name)
-                .map(String::toLowerCase)
-                .toList();
+    private final String description;
+
+    public static PlacementAlgorithm getByDescription(String description) {
+        for (PlacementAlgorithm algorithm : values()) {
+            if (algorithm.description.equals(description)) {
+                return algorithm;
+            }
+        }
+        throw new IllegalArgumentException("No PlacementAlgorithm with description: " + description);
     }
 }

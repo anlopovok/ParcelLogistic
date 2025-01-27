@@ -1,51 +1,35 @@
 package ru.hofftech.parcellogistic.model;
 
-import lombok.Getter;
-import ru.hofftech.parcellogistic.model.dto.ParcelJsonNodeDto;
+import ru.hofftech.parcellogistic.model.entity.ParcelEntity;
 
 import java.util.List;
 
-public final class Parcel {
+public record Parcel(String name, List<String> content) {
 
-    private final List<String> lines;
-
-    @Getter
-    private final int width;
-
-    @Getter
-    private final int height;
-
-    public Parcel(List<String> lines) {
-        this.lines = lines;
-        this.width = lines.stream()
-                .mapToInt(String::length)
-                .max()
-                .orElse(lines.getLast().length());
-        this.height = lines.size();
-    }
-
-    public ParcelJsonNodeDto toJson() {
-        String joinedLine = String.join("", lines);
-
-        return ParcelJsonNodeDto.builder()
-                .symbol(joinedLine.substring(0, 1))
-                .content(lines)
-                .build();
-    }
-
-    public String toString() {
-        return String.join(String.format("%n"), lines);
+    public static Parcel fromEntity(ParcelEntity entity) {
+        return new Parcel(entity.name(), entity.content());
     }
 
     public int getWidthAtLine(int line) {
-        return lines.get(line).length();
+        return content.get(line).length();
     }
 
     public char getCharAtPosition(int line, int column) {
-        return lines.get(line).charAt(column);
+        return content.get(line).charAt(column);
     }
 
     public int getWeight() {
-        return String.join("", lines).length();
+        return String.join("", content).length();
+    }
+
+    public int getWidth() {
+        return content.stream()
+                .mapToInt(String::length)
+                .max()
+                .orElse(content.getLast().length());
+    }
+
+    public int getHeight() {
+        return content.size();
     }
 }
