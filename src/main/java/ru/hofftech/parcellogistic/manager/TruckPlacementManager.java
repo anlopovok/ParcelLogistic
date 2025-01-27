@@ -1,24 +1,42 @@
 package ru.hofftech.parcellogistic.manager;
 
-import lombok.extern.slf4j.Slf4j;
+import ru.hofftech.parcellogistic.model.Coordinate;
 import ru.hofftech.parcellogistic.model.Parcel;
 import ru.hofftech.parcellogistic.model.Truck;
 
-@Slf4j
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Manages the placement of parcels within a truck, ensuring they fit properly
+ * and are positioned according to specified constraints.
+ */
 public class TruckPlacementManager {
 
+    /**
+     * Attempts to place a parcel into the given truck if space allows.
+     *
+     * @param parcel the parcel to be placed
+     * @param truck the truck where the parcel should be placed
+     */
     public void place(Parcel parcel, Truck truck) {
         for (int line = truck.getHeight() - 1; line >= 0; line--) {
             for (int column = truck.getFilledWidth(line); column < truck.getWidth(); column++) {
                 if (canPlaceByStartPosition(parcel, truck, line, column)) {
                     placeByStartPosition(parcel, truck, line, column);
-                    truck.add(parcel);
                     return;
                 }
             }
         }
     }
 
+    /**
+     * Determines if a parcel can be placed within the given truck.
+     *
+     * @param parcel the parcel to check
+     * @param truck the truck to check against
+     * @return true if the parcel can be placed, false otherwise
+     */
     public boolean canPlace(Parcel parcel, Truck truck) {
         for (int line = truck.getHeight() - 1; line >= 0; line--) {
             for (int column = truck.getFilledWidth(line); column < truck.getWidth(); column++) {
@@ -47,15 +65,14 @@ public class TruckPlacementManager {
             int truckLine,
             int truckColumn
     ) {
+        List<Coordinate> coordinates = new ArrayList<>();
         for (int parcelLine = 0; parcelLine < parcel.getHeight(); parcelLine++) {
             for (int parcelColumn = 0; parcelColumn < parcel.getWidthAtLine(parcelLine); parcelColumn++) {
-                truck.setCharAtPosition(
-                        truckLine + parcelLine,
-                        truckColumn + parcelColumn,
-                        parcel.getCharAtPosition(parcelLine, parcelColumn)
-                );
+                coordinates.add(new Coordinate(truckLine + parcelLine, truckColumn + parcelColumn));
             }
         }
+
+        truck.addParcel(parcel, coordinates);
     }
 
     private boolean isFitsInTruckFromStartPosition(

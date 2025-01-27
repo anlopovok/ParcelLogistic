@@ -1,30 +1,35 @@
 package ru.hofftech.parcellogistic.model;
 
 import lombok.Getter;
-import ru.hofftech.parcellogistic.model.dto.ParcelJsonNodeDto;
-import ru.hofftech.parcellogistic.model.dto.ParcelsJsonNodeDto;
-import ru.hofftech.parcellogistic.settings.TruckSettings;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Truck {
 
     @Getter
-    private final int width;
+    private final Size size;
 
     @Getter
-    private final int height;
-
-    private final List<Parcel> parcels;
+    private final Map<Parcel, List<Coordinate>> parcelsCoordinates;
 
     private final char[][] placement;
 
-    public Truck(TruckSettings truckSettings) {
-        this.width = truckSettings.width();
-        this.height = truckSettings.height();
-        this.parcels = new ArrayList<>();
-        this.placement = new char[height][width];
+    public Truck(Size size) {
+        this.size = size;
+        this.parcelsCoordinates = new HashMap<>();
+        this.placement = new char[size.height()][size.width()];
+    }
+
+    public int getWidth() {
+        return size.width();
+    }
+
+    public int getHeight() {
+        return size.height();
     }
 
     public int getFilledWidth(int line) {
@@ -36,65 +41,77 @@ public class Truck {
         return filledWidth;
     }
 
-    public char getCharAtPosition(int line, int column) {
-        return placement[line][column];
-    }
-
-    public void setCharAtPosition(int line, int column, char value) {
-        placement[line][column] = value;
-    }
-
     public boolean isFilledAtPosition(int line, int column) {
         return placement[line][column] != 0;
     }
 
     public int getCurrentLine() {
-        for (int i = height - 1; i > 0; i--) {
+        for (int i = size.height() - 1; i > 0; i--) {
             if (getFilledWidth(i) < getWidth()) {
                 return i;
             }
         }
 
-        return height - 1;
+        return size.height() - 1;
     }
 
     public boolean isHeightLessThan(int line) {
-        return line > height;
+        return line > size.height();
     }
 
     public boolean isOutOfBounds(int line, int column) {
-        return line < 0 || line >= height || column < 0 || column >= width;
+        return line < 0 || line >= size.height() || column < 0 || column >= size.width();
     }
 
-    public void add(Parcel parcel) {
-        parcels.add(parcel);
+    public void addParcel(Parcel parcel, List<Coordinate> coordinates) {
+        List<Coordinate> sortedCoordinates = coordinates.stream()
+                .sorted(Comparator.comparingInt(Coordinate::line).thenComparing(Coordinate::column))
+                .toList();
+
+        Coordinate startCoordinate = sortedCoordinates.getFirst();
+        int lineShift = startCoordinate.line();
+        int columnShift = startCoordinate.column();
+
+        for (Coordinate coordinate : sortedCoordinates) {
+            setCharAtPosition(
+                    coordinate.line(),
+                    coordinate.column(),
+                    parcel.getCharAtPosition(
+                            coordinate.line() - lineShift,
+                            coordinate.column() - columnShift
+                    )
+            );
+        }
+
+        parcelsCoordinates.put(parcel, coordinates);
     }
 
     public int getWeight() {
-        return parcels.stream().map(Parcel::getWeight).reduce(0, Integer::sum);
+        return parcelsCoordinates.keySet().stream().map(Parcel::getWeight).reduce(0, Integer::sum);
     }
 
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i <= height; i++) {
-            for (int j = -1; j <= width; j++) {
-                if (i == height || j == -1 || j == width) {
-                    stringBuilder.append('+');
-                } else {
-                    stringBuilder.append(
-                        !isFilledAtPosition(i, j) ? ' ' : getCharAtPosition(i, j)
-                    );
-                }
+    public boolean hasParcels() {
+        return !parcelsCoordinates.isEmpty();
+    }
+
+    public List<String> getContent() {
+        List<String> content = new ArrayList<>();
+        for (int i = 0; i < size.height(); i++) {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int j = 0; j < size.width(); j++) {
+                stringBuilder.append(!isFilledAtPosition(i, j) ? ' ' : getCharAtPosition(i, j));
             }
-            stringBuilder.append(String.format("%n"));
+            content.add(stringBuilder.toString());
         }
 
-        return stringBuilder.toString();
+        return content;
     }
 
-    public ParcelsJsonNodeDto toJson() {
-        List<ParcelJsonNodeDto> jsonParcels = parcels.stream().map(Parcel::toJson).toList();
+    private void setCharAtPosition(int line, int column, char value) {
+        placement[line][column] = value;
+    }
 
-        return ParcelsJsonNodeDto.builder().parcels(jsonParcels).build();
+    private char getCharAtPosition(int line, int column) {
+        return placement[line][column];
     }
 }
